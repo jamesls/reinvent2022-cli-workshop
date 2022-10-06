@@ -24,6 +24,9 @@ export class AppStack extends cdk.Stack {
       taskImageOptions: {
         image: ecs.ContainerImage.fromAsset('../src'),
         containerPort: 5000,
+	environment: {
+          'MYAPP_FOO': 'BAR',
+	},
       },
       memoryLimitMiB: 2048,
       publicLoadBalancer: true,
