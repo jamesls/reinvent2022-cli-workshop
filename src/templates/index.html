@@ -3,6 +3,7 @@
 
 {% block content %}
     <h1>Reviews</h1>
+    <p>Pulling data from {{ table_name }}</p>
     <a class="btn btn-primary" href="{{ url_for('review') }}" role="button">Create Review</a>
 {{ render_table(reviews, [('product_name', 'Product'), ('rating', 'Rating'), ('review_text', 'Review')]) }}
 {% endblock %}
