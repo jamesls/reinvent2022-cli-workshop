@@ -8,37 +8,40 @@ from wtforms.fields import IntegerField, StringField, PasswordField
 from wtforms.fields import BooleanField, SubmitField, URLField
 from wtforms.fields import FloatField, TextAreaField
 
+from ddb import DDBClient, ProductReview
+
 
 app = Flask(__name__)
+app.config['DDB_TABLE_NAME'] = os.environ.get('APPTABLE_NAME', '')
 app.secret_key = 'dev'
 bootstrap = Bootstrap5(app)
-APP_TABLE_NAME = os.environ.get('APP_TABLE_NAME', '')
+ddb = DDBClient(app)
 
 
 class ReviewForm(FlaskForm):
     product_name = StringField('Product Name', validators=[DataRequired(), Length(1, 50)])
     product_link = URLField()
-    rating = IntegerField()
-    review_text = TextAreaField()
+    rating = IntegerField(validators=[DataRequired()])
+    review_text = TextAreaField(validators=[DataRequired()])
     submit = SubmitField()
 
 
 reviews = [
-    {'product_name': 'Foo Product', 'product_link': '', 'rating': '4.5',
+    {'product_name': 'Foo Product', 'product_link': '', 'rating': 5,
      'review_text': 'This is my review of foo.'},
-    {'product_name': 'Bar Product', 'product_link': '', 'rating': '4.5',
+    {'product_name': 'Bar Product', 'product_link': '', 'rating': 5,
      'review_text': 'This is my review of bar.'},
-    {'product_name': 'Baz Product', 'product_link': '', 'rating': '4.5',
+    {'product_name': 'Baz Product', 'product_link': '', 'rating': 4,
      'review_text': 'This is my review of baz.'},
 ]
 
 
 @app.route("/")
 def index():
+    reviews = ddb.get_reviews()
     return render_template(
         'index.html',
         reviews=reviews,
-        table_name=APP_TABLE_NAME,
     )
 
 
@@ -46,6 +49,13 @@ def index():
 def review():
     form = ReviewForm()
     if form.validate_on_submit():
+        new_review = ProductReview(
+            name=form.product_name.data,
+            rating=form.rating.data,
+            review=form.review_text.data,
+            url=form.product_link.data,
+        )
+        ddb.create_review(new_review)
         flash('Review added!')
         return redirect(url_for('index'))
     return render_template(
