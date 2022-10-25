@@ -64,6 +64,6 @@ Outputs:
   apptableName:
     Description: "The name of this DynamoDB."
     Value: !Ref apptable
-  apptableAccessPolicy:
-    Description: "The IAM::ManagedPolicy to attach to the task role."
-    Value: !Ref apptableAccessPolicy
+#  apptableAccessPolicy:
+#    Description: "The IAM::ManagedPolicy to attach to the task role."
+#    Value: !Ref apptableAccessPolicy
