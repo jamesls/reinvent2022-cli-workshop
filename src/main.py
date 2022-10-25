@@ -38,7 +38,11 @@ reviews = [
 
 @app.route("/")
 def index():
-    reviews = ddb.get_reviews()
+    try:
+        reviews = ddb.get_reviews()
+    except Exception as e:
+        app.logger.error("Unable to retrieve reviews data from DDB.", exc_info=True)
+        reviews = []
     return render_template(
         'index.html',
         reviews=reviews,
@@ -48,6 +52,7 @@ def index():
 @app.route("/review", methods=['GET', 'POST'])
 def review():
     form = ReviewForm()
+    error = None
     if form.validate_on_submit():
         new_review = ProductReview(
             name=form.product_name.data,
@@ -55,12 +60,19 @@ def review():
             review=form.review_text.data,
             url=form.product_link.data,
         )
-        ddb.create_review(new_review)
-        flash('Review added!')
-        return redirect(url_for('index'))
+        try:
+            ddb.create_review(new_review)
+        except Exception:
+            app.logger.error("Unable to save review data to DDB.", exc_info=True)
+            error = "Unable to save review"
+            flash(error, 'error')
+        else:
+            flash('Review added!')
+            return redirect(url_for('index'))
     return render_template(
         'review.html',
         form=form,
+        error=error,
     )
 
 
