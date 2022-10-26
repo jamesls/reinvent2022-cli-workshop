@@ -1,0 +1,13 @@
+app-infra/**/*.js
+!jest.config.js
+*.d.ts
+node_modules
+
+# CDK asset staging directory
+app-infra/.cdk.staging
+app-infra/cdk.out
+
+# Python compilation
+*.py[cod]
+__pycache__/
+*.so
